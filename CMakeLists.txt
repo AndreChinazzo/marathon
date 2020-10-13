@@ -49,6 +49,7 @@ set(HEADER_FILES
         ${PROJECT_SOURCE_DIR}/include/marathon/binary_matrix/fixed_margin/random_generator_mcmc.h
         ${PROJECT_SOURCE_DIR}/include/marathon/binary_matrix/fixed_margin/instance.h
         ${PROJECT_SOURCE_DIR}/include/marathon/binary_matrix/fixed_margin/curveball.h
+        ${PROJECT_SOURCE_DIR}/include/marathon/binary_matrix/fixed_margin/sys_curveball.h
         ${PROJECT_SOURCE_DIR}/include/marathon/binary_matrix/fixed_margin/canonical_path_kannan.h
         ${PROJECT_SOURCE_DIR}/include/marathon/binary_matrix/fixed_margin/switch_chain.h
         ${PROJECT_SOURCE_DIR}/include/marathon/binary_matrix/fixed_margin/edge_switch_chain.h
@@ -105,9 +106,9 @@ endif ()
 
 # try to find blas for linear algebra
 set(BLA_VENDOR Generic)
-find_package(BLAS)
+find_package(CBLAS)
 if(BLAS_FOUND)
-    add_definitions(-DUSE_BLAS)
+#    add_definitions(-DUSE_BLAS)
     message(STATUS "Found BLAS libraries ${BLAS_LIBRARIES}")
     include_directories(${BLAS_INCLUDE_DIRS})
     set(MARATHON_LIBRARIES ${MARATHON_LIBRARIES} ${BLAS_LIBRARIES})
@@ -116,7 +117,7 @@ endif()
 # try to find armadillo for linear algebra
 find_package(Armadillo)
 if(ARMADILLO_FOUND)
-    add_definitions(-DUSE_ARMADILLO)
+#    add_definitions(-DUSE_ARMADILLO)
     include_directories(${ARMADILLO_INCLUDE_DIRS})
     set(MARATHON_LIBRARIES ${MARATHON_LIBRARIES} ${ARMADILLO_LIBRARIES})
 endif()

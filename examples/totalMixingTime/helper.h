@@ -12,6 +12,7 @@ enum chain_t {
     classical_switch,
     edge_switch,
     curveball,
+    sys_curveball,
 } chain;
 
 std::string inst;       // string encoded problem instance
@@ -34,6 +35,8 @@ bool parse_arguments(int argc, char **argv) {
         chain = edge_switch;
     else if (strcmp(argv[1], "curveball") == 0)
         chain = curveball;
+    else if (strcmp(argv[1], "sys-curveball") == 0)
+        chain = sys_curveball;
     else {
         std::cerr << "Unknown CHAIN specifier: " << argv[1] << std::endl;
         return false;
@@ -64,6 +67,8 @@ void print_help_message() {
     std::cout << "       Markov chain defined by 'Strona et al. A fast and unbiased procedure to" << std::endl;
     std::cout << "       randomize ecological binary matrices with fixed row and column totals." << std::endl;
     std::cout << "       Nature communications 5 (2014).'" << std::endl;
+    std::cout << "  'sys-curveball':" << std::endl;
+    std::cout << "       TODO" << std::endl;
     std::cout << std::endl;
     std::cout << "EPSILON must be a floating point number in the open interval (0,1).\n" << std::endl;
     std::cout << "The parameter INSTANCE is a string-encoded input instance of the form \"r*;c*\"." << std::endl;
