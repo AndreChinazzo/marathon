@@ -152,6 +152,11 @@ namespace marathon {
                     int degree;
                 };
 
+                auto trowsum = std::accumulate(seq._rowsum.begin(), seq._rowsum.end(), 0);
+                auto tcolsum = std::accumulate(seq._colsum.begin(), seq._colsum.end(), 0);
+                if ( trowsum != tcolsum )
+                    throw std::runtime_error("Total row and column sums are different!");
+
                 // sorted vector of index-degree-pairs
                 std::vector<A> column(ncol);
                 for (size_t j = 0; j < ncol; j++) {
