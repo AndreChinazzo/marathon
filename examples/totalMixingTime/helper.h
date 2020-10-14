@@ -6,6 +6,15 @@
 #define MARATHON_HELPER_H
 
 #include <iostream>
+#include <fstream>
+#include <sys/stat.h>
+
+
+// From https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
+inline bool fileExists (const std::string& name) {
+    struct stat buffer;
+    return (stat (name.c_str(), &buffer) == 0);
+}
 
 // Markov chains
 enum chain_t {
@@ -15,7 +24,7 @@ enum chain_t {
     sys_curveball,
 } chain;
 
-std::string inst;       // string encoded problem instance
+std::vector<std::string> insts;       // vector of strings encodeding problem instance
 double eps = -1;        // maximal distance to uniform distribution (error term)
 
 /**
@@ -43,8 +52,18 @@ bool parse_arguments(int argc, char **argv) {
     }
 
     eps = atof(argv[2]);
-    inst = std::string(argv[3]);
 
+    if ( fileExists(std::string(argv[3])) ) {
+        std::ifstream instsFile( argv[3] );
+        std::string inst;
+        while (std::getline(instsFile, inst)) {
+            insts.push_back( inst );
+        }
+    }
+    else // Single instance
+    {
+        insts.push_back(std::string(argv[3]));
+    }
     return true;
 }
 
