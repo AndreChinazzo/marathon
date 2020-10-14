@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
 # Paramters that can be specified to enable optional functions.
-# USE_BOOST_SERIALIZATION
+option(USE_BOOST_SERIALIZATION "Use Boost serialization" OFF)
+option(USE_BLAS "Use BLAS for linear algebra" ON)
+option(USE_ARMADILLO "Use Armadillo for linear algebra" ON)
 
 # Project Specifics
 project(marathon)
@@ -105,21 +107,25 @@ if (OPENMP_FOUND)
 endif ()
 
 # try to find blas for linear algebra
-set(BLA_VENDOR Generic)
-find_package(CBLAS)
-if(BLAS_FOUND)
-#    add_definitions(-DUSE_BLAS)
-    message(STATUS "Found BLAS libraries ${BLAS_LIBRARIES}")
-    include_directories(${BLAS_INCLUDE_DIRS})
-    set(MARATHON_LIBRARIES ${MARATHON_LIBRARIES} ${BLAS_LIBRARIES})
-endif()
+if (USE_BLAS)
+    set(BLA_VENDOR Generic)
+    find_package(CBLAS)
+    if(BLAS_FOUND)
+        add_definitions(-DUSE_BLAS)
+        message(STATUS "Found BLAS libraries ${BLAS_LIBRARIES}")
+        include_directories(${BLAS_INCLUDE_DIRS})
+        set(MARATHON_LIBRARIES ${MARATHON_LIBRARIES} ${BLAS_LIBRARIES})
+    endif()
+endif ()
 
 # try to find armadillo for linear algebra
-find_package(Armadillo)
-if(ARMADILLO_FOUND)
-#    add_definitions(-DUSE_ARMADILLO)
-    include_directories(${ARMADILLO_INCLUDE_DIRS})
-    set(MARATHON_LIBRARIES ${MARATHON_LIBRARIES} ${ARMADILLO_LIBRARIES})
+if (USE_ARMADILLO)
+    find_package(Armadillo)
+    if(ARMADILLO_FOUND)
+    #    add_definitions(-DUSE_ARMADILLO)
+        include_directories(${ARMADILLO_INCLUDE_DIRS})
+        set(MARATHON_LIBRARIES ${MARATHON_LIBRARIES} ${ARMADILLO_LIBRARIES})
+    endif()
 endif()
 
 # try to find Eigen3
