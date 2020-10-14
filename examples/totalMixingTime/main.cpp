@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
             break;
         default:
             std::cerr << "Undefined behavior: CHAIN unknown: " << argv[1] << std::endl;
-            return false;
+            return -1;
     }
 
     // construct state graph
@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
 
     // determine number of states
     const size_t N = sg.getNumStates();
-
     // calculate total mixing time
     marathon::MixingTimeCalculator<double> mtc(sg);
     int t;
@@ -57,7 +56,11 @@ int main(int argc, char **argv) {
         t = mtc.totalMixingTime(eps);
     }
 
-    std::cout << t << std::endl;
+    std::cout << "ds        " << inst << "\n";
+    std::cout << "mixalgo   " << std::string(argv[1]) << "\n";
+    std::cout << "eps       " << eps << "\n";
+    std::cout << "numstates " << N << "\n";
+    std::cout << "tmixtime  " << t << "\n";
 
     return 0;
 }

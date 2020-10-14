@@ -6,6 +6,7 @@
 #include "marathon/binary_matrix/fixed_margin/switch_chain.h"
 #include "marathon/binary_matrix/fixed_margin/edge_switch_chain.h"
 #include "marathon/binary_matrix/fixed_margin/curveball.h"
+#include "marathon/binary_matrix/fixed_margin/sys_curveball.h"
 
 // auxiliary functions
 #include "helper.h"
@@ -31,6 +32,12 @@ int main(int argc, char **argv) {
         case curveball:
             mc = std::make_unique<marathon::binary_matrix::fixed_margin::Curveball>(inst);
             break;
+        case sys_curveball:
+            mc = std::make_unique<marathon::binary_matrix::fixed_margin::SysCurveball>(inst);
+            break;
+        default:
+            std::cerr << "Undefined behavior: CHAIN unknown: " << argv[1] << std::endl;
+            return false;
     }
 
     // construct state graph

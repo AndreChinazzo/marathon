@@ -1,5 +1,5 @@
 /*
- * curveball.h
+ * sys_curveball.h
  *
  * Created on: Oct 13, 2019
  * Author: Andre Lucas Chinazzo <chinazzo@eit.uni-kl.de>
@@ -39,6 +39,45 @@ namespace marathon {
              * TODO
              */
             class SysCurveball : public MarkovChain {
+
+            private:
+
+                /**
+                 * Apply D or U trade to adjacency matrix M at rows r1 and r2.
+                 * @param M
+                 * @param r1
+                 * @param r2
+                 * @param doDTrade true: D-trade; false: U-trade
+                 */
+                void applyTrade(BinaryMatrix &M, const int r1, const int r2, const bool doDTrade) const {
+                    const int ncol = (int) _inst.getNumCols();
+
+                    const int NOT_FOUND = ncol;
+
+                    bool lookingForDTrade = doDTrade;
+                    int lastTradableCol = NOT_FOUND;
+
+                    for (int j = 0; j < ncol; j++) {
+
+                        int r1_j = static_cast<bool>(M.get(r1, j));
+                        int r2_j = static_cast<bool>(M.get(r2, j));
+
+                        if (r1_j != r2_j) {
+
+                            if ( r2_j == lookingForDTrade ) { lastTradableCol = j; }
+                            else if ( lastTradableCol != NOT_FOUND ) {
+                                M.set(r1, lastTradableCol, lookingForDTrade);
+                                M.set(r2, lastTradableCol, !lookingForDTrade);
+
+                                M.set(r1, j, !lookingForDTrade);
+                                M.set(r2, j, lookingForDTrade);
+
+                                lastTradableCol = NOT_FOUND;
+                                lookingForDTrade = !lookingForDTrade;
+                            }
+                        }
+                    }
+                }
 
             protected:
 
@@ -132,77 +171,32 @@ namespace marathon {
                     // Make a copy of the current state
                     BinaryMatrix A(X);
 
-                    // auxiliary array
-                    std::vector<int> tmp1(ncol);
-                    std::vector<int> tmp2(ncol);
-
                     /**
                      * TODO: UPDATE
-                     * Definition of Strona et. al: A fast and unbiased procedure
-                     * to randomize ecological binary matrices with fixed row and
-                     * column totals.
+                     * Definition
                      */
 
                     // randomly select two row indices
                     for (int i = 0; i < nrow; i++) {
                         for (int k = i + 1; k < nrow; k++) {
 
-                            // select the indices that occur in on the Ai and Ak, but not in both
-                            int a = 0;
-                            int b = 0;
-
-                            // for each column position
-                            for (int j = 0; j < ncol; j++) {
-
-                                int A_ij = X.get(i, j);
-                                int A_kj = X.get(k, j);
-
-                                if (A_ij != A_kj) {
-
-                                    // store index j in temporary array
-                                    tmp1[a + b] = j;
-
-                                    if (A_ij)
-                                        a++;
-                                    else
-                                        b++;
-                                }
-                            }
-
                             // calculate the probability of this choice
-                            const Integer num_subsets = binom(a + b, a);
                             const Integer num_row_sel = binom(nrow, 2);
-                            const Rational p(1, num_subsets * num_row_sel);
+                            const Rational p(1, 2 * num_row_sel); // 2: either D or U trade
 
-                            // simulate all combinations of choosing a out of (a+b) columns
-                            CombinationGenerator<int> cg(&tmp1[0], &tmp2[0], a + b, a);
-                            do {
-
-                                // set A[i,j]=0 and A[k,j]=1 for j in tmp1
-                                for (int l = 0; l < a + b; l++) {
-                                    int j = tmp1[l];
-                                    A.set(i, j, 0);
-                                    A.set(k, j, 1);
-                                }
-
-                                // for each selected column j: set A[i,j]=1 and A[k,j]=0
-                                for (int l = 0; l < a; l++) {
-                                    int j = tmp2[l];
-                                    A.set(i, j, 1);
-                                    A.set(k, j, 0);
-                                }
+                            for (int trade = 0; trade < 2; trade++ ) {
+                                // simulate 0: U or 1: D trades
+                                applyTrade(A, i, k, static_cast<bool>(trade));
+                                assert(_inst.isValid(A));
 
                                 // process adjacent state
                                 f(A, p);
-                                assert(_inst.isValid(A));
 
-                            } while (cg.next());
-
-                            // restore original state of rows i and k
-                            for (int l = 0; l < a + b; l++) {
-                                const int j = tmp1[l];
-                                A.set(i, j, X.get(i, j));
-                                A.set(k, j, X.get(k, j));
+                                // restore original state of rows i and k
+                                for (int j = 0; j < ncol; j++) {
+                                    A.set(i, j, X.get(i, j));
+                                    A.set(k, j, X.get(k, j));
+                                }
                             }
                         }
                     }
@@ -213,6 +207,7 @@ namespace marathon {
                  */
                 virtual void step() override {
 
+                    // TODO: UNTESTED
                     const size_t nrow = _inst.getNumRows();
                     const size_t ncol = _inst.getNumCols();
 
@@ -225,43 +220,10 @@ namespace marathon {
                     while (i == k)
                         k = rg.nextInt(nrow);
 
-                    // select the indices that occur in on the Ai and Ak, but not in both
-                    int a = 0;
-                    int b = 0;
+                    bool doDTrade = static_cast<bool>(rg.nextInt(2));
 
-                    // for each column position
-                    for (int j = 0; j < ncol; j++) {
-
-                        bool A_ij = _currentState.get(i, j);
-                        bool A_kj = _currentState.get(k, j);
-
-                        if (A_ij != A_kj) {
-
-                            // store index j in temporary array
-                            tmp1[a + b] = j;
-
-                            if (A_ij)
-                                a++;
-                            else
-                                b++;
-                        }
-                    }
-
-                    // randomly select a out of (a+b) elements to row i
-                    rg.shuffle<int>(&tmp1[0], a + b);
-
-                    for (int l = 0; l < a; l++) {
-                        int j = tmp1[l];
-                        _currentState.set(i, j, 1);
-                        _currentState.set(k, j, 0);
-                    }
-
-                    // the remaining elements to go row j
-                    for (int l = a; l < a + b; l++) {
-                        int j = tmp1[l];
-                        _currentState.set(i, j, 0);
-                        _currentState.set(k, j, 1);
-                    }
+                    applyTrade(_currentState, i, k, doDTrade);
+                    assert(_inst.isValid(_currentState));
                 }
 
                 /**
@@ -269,7 +231,7 @@ namespace marathon {
                  * @return
                  */
                 virtual std::unique_ptr<marathon::MarkovChain> copy() const override {
-                    return std::make_unique<Curveball>(_inst, _currentState);
+                    return std::make_unique<SysCurveball>(_inst, _currentState);
                 }
             };
         }
