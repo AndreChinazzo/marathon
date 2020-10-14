@@ -52,6 +52,12 @@ namespace marathon {
             const Rational Z = sg.getNormalizingConstant();
             for (size_t i = 0; i < omega; i++)
                 pi[i] = (sg.getWeight(i) / Z).convert_to<T>();
+
+            // check uniformity
+            for (size_t i = 1; i < omega; i++)
+                if ( pi[i-1] != pi[i] )
+                    throw std::runtime_error("Error! Chain does not reach uniform distribution");
+
             return pi;
         }
 
