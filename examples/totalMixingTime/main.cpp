@@ -59,8 +59,7 @@ void runTMixTime(std::string &inst) {
     res << chainName << ";";
     res << eps << ";";
     res << N << ";";
-    res << t << ";";
-    res << "\n";
+    res << t << "\n";
     std::cout << res.str();
 }
 
@@ -72,7 +71,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-//    std::cout << "ds;mixchain;eps;numstates;tmixtime" << "\n";
+    std::cout << "ds;mixchain;eps;numstates;tmixtime" << "\n";
 
     for( auto &inst : insts ) {
         try {
