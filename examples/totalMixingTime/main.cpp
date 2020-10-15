@@ -53,11 +53,15 @@ void runTMixTime(std::string &inst) {
     t = mtc.totalMixingTime(eps);
     }
 
-    std::cout << "ds        " << inst << "\n";
-    std::cout << "mixalgo   " << chainName << "\n";
-    std::cout << "eps       " << eps << "\n";
-    std::cout << "numstates " << N << "\n";
-    std::cout << "tmixtime  " << t << "\n";
+
+    std::stringstream res("");
+    res << "\"" << inst << "\"" << ";";
+    res << chainName << ";";
+    res << eps << ";";
+    res << N << ";";
+    res << t << ";";
+    res << "\n";
+    std::cout << res.str();
 }
 
 int main(int argc, char **argv) {
@@ -67,6 +71,8 @@ int main(int argc, char **argv) {
         print_help_message();
         return -1;
     }
+
+//    std::cout << "ds;mixchain;eps;numstates;tmixtime" << "\n";
 
     for( auto &inst : insts ) {
         try {
