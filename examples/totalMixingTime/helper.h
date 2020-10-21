@@ -22,6 +22,7 @@ enum chain_t {
     edge_switch,
     curveball,
     sys_curveball,
+    quasi_curveball,
 } chain;
 
 std::vector<std::string> insts;       // vector of strings encodeding problem instance
@@ -46,6 +47,8 @@ bool parse_arguments(int argc, char **argv) {
         chain = curveball;
     else if (strcmp(argv[1], "sys-curveball") == 0)
         chain = sys_curveball;
+    else if (strcmp(argv[1], "quasi-curveball") == 0)
+        chain = quasi_curveball;
     else {
         std::cerr << "Unknown CHAIN specifier: " << argv[1] << std::endl;
         return false;
@@ -87,6 +90,8 @@ void print_help_message() {
     std::cout << "       randomize ecological binary matrices with fixed row and column totals." << std::endl;
     std::cout << "       Nature communications 5 (2014).'" << std::endl;
     std::cout << "  'sys-curveball':" << std::endl;
+    std::cout << "       TODO" << std::endl;
+    std::cout << "  'quasi-curveball':" << std::endl;
     std::cout << "       TODO" << std::endl;
     std::cout << std::endl;
     std::cout << "EPSILON must be a floating point number in the open interval (0,1).\n" << std::endl;

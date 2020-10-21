@@ -7,6 +7,7 @@
 #include "marathon/binary_matrix/fixed_margin/edge_switch_chain.h"
 #include "marathon/binary_matrix/fixed_margin/curveball.h"
 #include "marathon/binary_matrix/fixed_margin/sys_curveball.h"
+#include "marathon/binary_matrix/fixed_margin/quasi_curveball.h"
 
 // auxiliary functions
 #include "helper.h"
@@ -31,6 +32,10 @@ void runTMixTime(std::string &inst) {
     case sys_curveball:
     mc = std::make_unique<marathon::binary_matrix::fixed_margin::SysCurveball>(inst);
     chainName = "sys_curveball";
+    break;
+    case quasi_curveball:
+    mc = std::make_unique<marathon::binary_matrix::fixed_margin::QuasiCurveball>(inst);
+    chainName = "quasi_curveball";
     break;
     default:
     std::cerr << "Undefined behavior: CHAIN unknown" << std::endl;
