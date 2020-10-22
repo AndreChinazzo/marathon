@@ -26,6 +26,8 @@ enum chain_t {
     quasi_curveball2,
     quasi_curveball3,
     quasi_curveball4,
+    quasi_curveball5,
+    quasi_curveball6,
 } chain;
 
 std::vector<std::string> insts;       // vector of strings encodeding problem instance
@@ -58,6 +60,10 @@ bool parse_arguments(int argc, char **argv) {
         chain = quasi_curveball3;
     else if (strcmp(argv[1], "quasi-curveball4") == 0)
         chain = quasi_curveball4;
+    else if (strcmp(argv[1], "quasi-curveball5") == 0)
+        chain = quasi_curveball5;
+    else if (strcmp(argv[1], "quasi-curveball6") == 0)
+        chain = quasi_curveball6;
     else {
         std::cerr << "Unknown CHAIN specifier: " << argv[1] << std::endl;
         return false;

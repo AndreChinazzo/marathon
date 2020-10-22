@@ -11,6 +11,8 @@
 #include "marathon/binary_matrix/fixed_margin/quasi_curveball2.h"
 #include "marathon/binary_matrix/fixed_margin/quasi_curveball3.h"
 #include "marathon/binary_matrix/fixed_margin/quasi_curveball4.h"
+#include "marathon/binary_matrix/fixed_margin/quasi_curveball5.h"
+#include "marathon/binary_matrix/fixed_margin/quasi_curveball6.h"
 
 // auxiliary functions
 #include "helper.h"
@@ -51,6 +53,14 @@ void runTMixTime(std::string &inst) {
     case quasi_curveball4:
     mc = std::make_unique<marathon::binary_matrix::fixed_margin::QuasiCurveball4>(inst);
     chainName = "quasi_curveball4";
+    break;
+    case quasi_curveball5:
+    mc = std::make_unique<marathon::binary_matrix::fixed_margin::QuasiCurveball5>(inst);
+    chainName = "quasi_curveball5";
+    break;
+    case quasi_curveball6:
+    mc = std::make_unique<marathon::binary_matrix::fixed_margin::QuasiCurveball6>(inst);
+    chainName = "quasi_curveball6";
     break;
     default:
     std::cerr << "Undefined behavior: CHAIN unknown" << std::endl;
