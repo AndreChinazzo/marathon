@@ -23,6 +23,9 @@ enum chain_t {
     curveball,
     sys_curveball,
     quasi_curveball,
+    quasi_curveball2,
+    quasi_curveball3,
+    quasi_curveball4,
 } chain;
 
 std::vector<std::string> insts;       // vector of strings encodeding problem instance
@@ -49,6 +52,12 @@ bool parse_arguments(int argc, char **argv) {
         chain = sys_curveball;
     else if (strcmp(argv[1], "quasi-curveball") == 0)
         chain = quasi_curveball;
+    else if (strcmp(argv[1], "quasi-curveball2") == 0)
+        chain = quasi_curveball2;
+    else if (strcmp(argv[1], "quasi-curveball3") == 0)
+        chain = quasi_curveball3;
+    else if (strcmp(argv[1], "quasi-curveball4") == 0)
+        chain = quasi_curveball4;
     else {
         std::cerr << "Unknown CHAIN specifier: " << argv[1] << std::endl;
         return false;
@@ -92,6 +101,8 @@ void print_help_message() {
     std::cout << "  'sys-curveball':" << std::endl;
     std::cout << "       TODO" << std::endl;
     std::cout << "  'quasi-curveball':" << std::endl;
+    std::cout << "       TODO" << std::endl;
+    std::cout << "  'split-quasi-curveball':" << std::endl;
     std::cout << "       TODO" << std::endl;
     std::cout << std::endl;
     std::cout << "EPSILON must be a floating point number in the open interval (0,1).\n" << std::endl;

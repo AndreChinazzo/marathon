@@ -1,5 +1,5 @@
 /*
- * quasi_curveball.h
+ * quasi_curveball2.h
  *
  * Created on: Oct 13, 2019
  * Author: Andre Lucas Chinazzo <chinazzo@eit.uni-kl.de>
@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#ifndef QUASI_CURVEBALL_H_
-#define QUASI_CURVEBALL_H_
+#ifndef QUASI_CURVEBALL2_H_
+#define QUASI_CURVEBALL2_H_
 
 #include "marathon/binary_matrix/fixed_margin/markov_chain.h"
 
@@ -38,9 +38,9 @@ namespace marathon {
              *
              * TODO
              * Does the first then the second trading parts
-             * Uses NEW random bits for the second part
+             * Uses THE SAME random bits for the second part
              */
-            class QuasiCurveball : public MarkovChain {
+            class QuasiCurveball2 : public MarkovChain {
 
             private:
 
@@ -76,8 +76,7 @@ namespace marathon {
                 int getNumTradeBits(BinaryMatrix &M, const int r1, const int r2) const {
 
                     int nTradableCols = getNumTradableCols(M, r1, r2);
-
-                    int nTradeBits = std::max(0, nTradableCols-1);
+                    int nTradeBits = nTradableCols / 2;
                     return nTradeBits;
                 }
 
@@ -95,23 +94,20 @@ namespace marathon {
                 }
 
                 /**
-                 * Apply Paired Trades to adjacency matrix M at rows r1 and r2.
+                 * Apply first part of Paired Trades to adjacency matrix M at rows r1 and r2.
                  * @param M
                  * @param r1
                  * @param r2
                  * @param tradeBits
                  */
-                void applyTrade(BinaryMatrix &M, const int r1, const int r2, std::bitset<32> tradeBits) const {
+                int applyFirstTrade(BinaryMatrix &M, const int r1, const int r2, std::bitset<32> tradeBits) const {
                     const int ncol = (int) _inst.getNumCols();
 
                     const int NOT_FOUND = ncol;
 
                     int tradeCount = 0;
+//                    std::cout << "Trade bits part one: ";
 
-//                    std::cout << tradeBits << "\n";
-//                    std::cout << M.fancyString() << "\n";
-
-                    // First pass
                     int lastTradableCol = NOT_FOUND;
                     for (int j = 0; j < ncol; j++) {
 
@@ -120,27 +116,49 @@ namespace marathon {
 
                         if (r1_j != r2_j) {
 
-                            if ( lastTradableCol == NOT_FOUND ) { lastTradableCol = j; }
-                            else if ( tradeBits[tradeCount++] ) {
-                                bool r1_last = static_cast<bool>(M.get(r1, lastTradableCol));
-                                bool r2_last = static_cast<bool>(M.get(r2, lastTradableCol));
+                            if (lastTradableCol == NOT_FOUND) { lastTradableCol = j; }
+                            else {
+                                bool doTrade = tradeBits[tradeCount];
+//                                std::cout << tradeBits[tradeCount];
+                                tradeCount++;
+                                if (doTrade) {
+                                    bool r1_last = static_cast<bool>(M.get(r1, lastTradableCol));
+                                    bool r2_last = static_cast<bool>(M.get(r2, lastTradableCol));
 
-                                M.set(r1, lastTradableCol, r1_j);
-                                M.set(r2, lastTradableCol, r2_j);
+                                    M.set(r1, lastTradableCol, r1_j);
+                                    M.set(r2, lastTradableCol, r2_j);
 
-                                M.set(r1, j, r1_last);
-                                M.set(r2, j, r2_last);
-
+                                    M.set(r1, j, r1_last);
+                                    M.set(r2, j, r2_last);
+                                }
                                 lastTradableCol = NOT_FOUND;
                             }
-                            else { lastTradableCol = NOT_FOUND; }
                         }
                     }
+//                    std::cout << "\n";
 
-//                    std::cout << M.fancyString() << "\n";
+                    return tradeCount;
 
-                    // Second pass
-                    lastTradableCol = NOT_FOUND;
+                }
+
+                /**
+                  * Apply second part of Paired Trades to adjacency matrix M at rows r1 and r2.
+                  * @param M
+                  * @param r1
+                  * @param r2
+                  * @param tradeBits
+                  */
+                int applySecondTrade(BinaryMatrix &M, const int r1, const int r2, std::bitset<32> tradeBits) const {
+                    const int ncol = (int) _inst.getNumCols();
+
+                    const int NOT_FOUND = ncol;
+
+                    int tradeCount = 0;
+                    int offset = 0; // using the same random bits //getNumTradableCols(M, r1, r2) / 2;
+
+//                    std::cout << "Trade bits part two: ";
+
+                    int lastTradableCol = NOT_FOUND;
                     bool isFirstTradable = true;
                     for (int j = 0; j < ncol; j++) {
 
@@ -148,23 +166,51 @@ namespace marathon {
                         int r2_j = static_cast<bool>(M.get(r2, j));
 
                         if (r1_j != r2_j) {
-                            if ( isFirstTradable ) { isFirstTradable = false; }
-                            else if ( lastTradableCol == NOT_FOUND ) { lastTradableCol = j; }
-                            else if ( tradeBits[tradeCount++] ) {
-                                bool r1_last = static_cast<bool>(M.get(r1, lastTradableCol));
-                                bool r2_last = static_cast<bool>(M.get(r2, lastTradableCol));
+                            if (isFirstTradable) { isFirstTradable = false; }
+                            else if (lastTradableCol == NOT_FOUND) { lastTradableCol = j; }
+                            else {
+                                bool doTrade = tradeBits[offset + tradeCount];
+//                                std::cout << tradeBits[offset + tradeCount];
+                                tradeCount++;
+                                if (doTrade) {
+                                    bool r1_last = static_cast<bool>(M.get(r1, lastTradableCol));
+                                    bool r2_last = static_cast<bool>(M.get(r2, lastTradableCol));
 
-                                M.set(r1, lastTradableCol, r1_j);
-                                M.set(r2, lastTradableCol, r2_j);
+                                    M.set(r1, lastTradableCol, r1_j);
+                                    M.set(r2, lastTradableCol, r2_j);
 
-                                M.set(r1, j, r1_last);
-                                M.set(r2, j, r2_last);
-
+                                    M.set(r1, j, r1_last);
+                                    M.set(r2, j, r2_last);
+                                }
                                 lastTradableCol = NOT_FOUND;
                             }
-                            else { lastTradableCol = NOT_FOUND; }
                         }
                     }
+//                    std::cout << "\n";
+
+                    return tradeCount;
+
+                }
+
+                /**
+                  * Apply second part of Paired Trades to adjacency matrix M at rows r1 and r2.
+                  * @param M
+                  * @param r1
+                  * @param r2
+                  * @param tradeBits
+                  */
+                void applyTrade(BinaryMatrix &M, const int r1, const int r2, std::bitset<32> tradeBits) const {
+                    const int ncol = (int) _inst.getNumCols();
+
+                    const int NOT_FOUND = ncol;
+
+//                    std::cout << firstOrSecond << "\n";
+//                    std::cout << tradeBits << "\n";
+//                    std::cout << M.fancyString() << "\n";
+
+                    int tradeCount = 0;
+                    tradeCount += applyFirstTrade(M, r1, r2, tradeBits);
+                    tradeCount += applySecondTrade(M, r1, r2, tradeBits);
 
 //                    std::cout << M.fancyString() << "\n";
 
@@ -185,7 +231,7 @@ namespace marathon {
                  * Create a Markov chain.
                  * @param inst Row and column sums.
                  */
-                explicit QuasiCurveball(Instance inst) : MarkovChain(std::move(inst)) {
+                explicit QuasiCurveball2(Instance inst) : MarkovChain(std::move(inst)) {
                     tmp1.resize(_currentState.getNumCols());
                 }
 
@@ -193,7 +239,7 @@ namespace marathon {
                 * Create a Markov chain.
                 * @param m Binary matrix used as initial state
                 */
-                explicit QuasiCurveball(BinaryMatrix m) : MarkovChain(std::move(m)) {
+                explicit QuasiCurveball2(BinaryMatrix m) : MarkovChain(std::move(m)) {
                     tmp1.resize(_currentState.getNumCols());
                 }
 
@@ -203,7 +249,7 @@ namespace marathon {
                  * @param inst Row and Column sums.
                  * @param bin BinaryMatrix used as initial state.
                  */
-                QuasiCurveball(Instance inst, BinaryMatrix bin)
+                QuasiCurveball2(Instance inst, BinaryMatrix bin)
                         : MarkovChain(std::move(inst), std::move(bin)) {
                     tmp1.resize(_currentState.getNumCols());
                 }
@@ -214,7 +260,7 @@ namespace marathon {
                  * Instances have the form "2,2,2;1,2,1,2".
                  * The semicolon separates the row sums from the column sums.
                  */
-                explicit QuasiCurveball(const std::string &inst) : QuasiCurveball(Instance(inst)) {
+                explicit QuasiCurveball2(const std::string &inst) : QuasiCurveball2(Instance(inst)) {
 
                 }
 
@@ -223,10 +269,10 @@ namespace marathon {
                 * @param rowsum Sequence of row sums.
                 * @param colsum Sequence of column sums.
                 */
-                QuasiCurveball(
+                QuasiCurveball2(
                         const std::vector<int> &rowsum,
                         const std::vector<int> &colsum
-                ) : QuasiCurveball(Instance(rowsum, colsum)) {
+                ) : QuasiCurveball2(Instance(rowsum, colsum)) {
 
                 }
 
@@ -237,12 +283,12 @@ namespace marathon {
                  * @param nrow Number of rows.
                  * @param ncol Number of columns.
                  */
-                QuasiCurveball(
+                QuasiCurveball2(
                         const int *rowsum,
                         const int *colsum,
                         size_t nrow,
                         size_t ncol
-                ) : QuasiCurveball(Instance(rowsum, colsum, nrow, ncol)) {
+                ) : QuasiCurveball2(Instance(rowsum, colsum, nrow, ncol)) {
 
                 }
 
@@ -279,6 +325,8 @@ namespace marathon {
                             const Integer num_row_sel = binom(nrow, 2);
                             const Integer nPossibleEndStates = getNumEndStates(A, i, k);
                             const Rational p(1, num_row_sel * nPossibleEndStates);
+                            const int nTradeBits = getNumTradeBits(A, i, k);
+
 
 //                            std::cout << nPossibleEndStates << "\n";
                             for (int trade = 0; trade < nPossibleEndStates; trade++ ) {
@@ -332,7 +380,7 @@ namespace marathon {
                  * @return
                  */
                 virtual std::unique_ptr<marathon::MarkovChain> copy() const override {
-                    return std::make_unique<QuasiCurveball>(_inst, _currentState);
+                    return std::make_unique<QuasiCurveball2>(_inst, _currentState);
                 }
             };
         }
@@ -340,4 +388,4 @@ namespace marathon {
 }
 
 
-#endif /* QUASI_CURVEBALL_H_ */
+#endif /* QUASI_CURVEBALL2_H_ */
