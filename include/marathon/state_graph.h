@@ -435,6 +435,12 @@ namespace marathon {
             // prepare vector of transitions
             outArcs.push_back(std::vector<Transition *>());
             inArcs.push_back(std::vector<Transition *>());
+
+            if ( states.size() > 10000 ) {
+                std::stringstream ss;
+                ss << "Would take too long. This is an arbitrary value, increase if you wish.";
+                throw std::runtime_error(ss.str());
+            }
             return states.size() - 1;
         }
 
