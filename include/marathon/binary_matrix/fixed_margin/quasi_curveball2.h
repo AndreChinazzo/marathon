@@ -317,19 +317,18 @@ namespace marathon {
                      * Definition
                      */
 
+                    const Integer num_row_sel = binom(nrow, 2);
+                    const Rational p(1, num_row_sel * (int)pow(2, ncol));
+
                     // randomly select two row indices
                     for (int i = 0; i < nrow; i++) {
                         for (int k = i + 1; k < nrow; k++) {
 
                             // calculate the probability of this choice
-                            const Integer num_row_sel = binom(nrow, 2);
-                            const Integer nPossibleEndStates = getNumEndStates(A, i, k);
-                            const Rational p(1, num_row_sel * nPossibleEndStates);
-                            const int nTradeBits = getNumTradeBits(A, i, k);
 
 
 //                            std::cout << nPossibleEndStates << "\n";
-                            for (int trade = 0; trade < nPossibleEndStates; trade++ ) {
+                            for (int trade = 0; trade < (int)pow(2, ncol); trade++ ) {
                                 // simulate 0: U or 1: D trades
 
                                 std::bitset<32> tradeBits(trade);

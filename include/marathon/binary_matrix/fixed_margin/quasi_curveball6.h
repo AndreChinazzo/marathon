@@ -363,13 +363,11 @@ namespace marathon {
 
                                 std::bitset<32> tradeBits(trade);
                                 applyTrade(A, i, k, tradeBits);
-
-                                std::cout << A.fancyString() << "\n";
-                                auto tradableBitsFromA = getTradableBitsFromA(A, i, k);
-                                std::cout << i << " " << k << "\n" << tradableBitsFromA << "\n";
-
-                                tradeBits ^= tradableBitsFromA;
                                 applyTrade(A, i, k, ~tradeBits);
+//                                applyTrade(A, i, k, tradeBits);
+//                                applyTrade(A, i, k, ~tradeBits);
+//                                applyTrade(A, i, k, tradeBits);
+
 //                                tradeBits[nTradeBits] = tradeBits[0];
 //                                tradeBits >>= 1;
 //                                applyTrade(A, i, k, tradeBits);
